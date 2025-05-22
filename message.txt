@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jogo da Velha - Versão Solo ou 2 Jogadores com Música</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: #fff;
+      user-select: none;
+      flex-direction: column;
+      padding: 20px;
+    }
+    .container {
+      background: rgba(255,255,255,0.1);
+      padding: 2rem 2.5rem;
+      border-radius: 15px;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.25);
+      width: 350px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    h1 {
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+      font-size: 2.2rem;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    #modeSelect {
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+    }
+    select {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.1rem;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: rgba(255,255,255,0.25);
+      color: #fff;
+      outline: none;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+      transition: background 0.3s ease;
+    }
+    select:hover, select:focus {
+      background: rgba(255,255,255,0.4);
+    }
+    #status {
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+      min-height: 1.2em;
+      text-shadow: 0 1px 5px rgba(0,0,0,0.3);
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 90px);
+      grid-template-rows: repeat(3, 90px);
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    .cell {
+      background: rgba(255,255,255,0.15);
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 3.8rem;
+      font-weight: 700;
+      color: #f7f7f7;
+      box-shadow: inset 0 0 8px rgba(255,255,255,0.4);
+      transition: background 0.3s ease;
+      position: relative;
+    }
+    .cell:hover {
+      background: rgba(255,255,255,0.30);
+    }
+    .cell.disabled {
+      cursor: not-allowed;
+      color: #999999;
+      background: rgba(255,255,255,0.08);
+    }
+    /* Custom style for O as a nice circle */
+    .cell.o::before {
+      content: '';
+      width: 60px;
+      height: 60px;
+      border: 5px solid #ffcc00;
+      border-radius: 50%;
+      display: block;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 8px #ffcc00;
+    }
+    /* Hide the letter O text */
+    .cell.o {
+      color: transparent;
+    }
+    button#restart {
+      background: #764ba2;
+      border: none;
+      padding: 0.7rem 1.5rem;
+      border-radius: 25px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      font-size: 1.1rem;
+      box-shadow: 0 6px 12px rgba(118,75,162,0.7);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+    button#restart:hover {
+      background: #5e3a90;
+      box-shadow: 0 8px 18px rgba(94,58,144,0.9);
+    }
+    .music-control {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #ddd;
+      cursor: pointer;
+      user-select: none;
+    }
+    .music-control:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" aria-label="Seleção de modo de jogo">
+    <h1>Jogo da Velha</h1>
+    <label for="modeSelect">Modo de jogo:</label>
+    <select id="modeSelect" aria-live="polite" aria-label="Escolha modo de jogo">
+      <option value="1">Jogar contra robô</option>
+      <option value="2">Dois jogadores</option>
+    </select>
+  </div>
+
+  <div class="container" aria-label="Área do jogo" role="main">
+    <div id="status" aria-live="polite">Selecione o modo para começar</div>
+    <div class="board" aria-label="Tabuleiro do jogo da velha" role="grid" tabindex="0">
+      <div class="cell" role="gridcell" data-index="0" tabindex="0"></div>
+      <div class="cell" role="gridcell" data-index="1" tabindex="0"></div>
+      <div class="cell" role="gridcell" data-index="2" tabindex="0"></div>
+      <div class="cell" role="gridcell" data-index="3" tabindex="0"></div>
+      <div class="cell" role="gridcell" data-index="4" tabindex="0"></div>
+      <div class="cell" role="gridcell" data-index="5" tabindex="0"></div>
+      <div class="cell" role="gridcell" data-index="6" tabindex="0"></div>
+      <div class="cell" role="gridcell" data-index="7" tabindex="0"></div>
+      <div class="cell" role="gridcell" data-index="8" tabindex="0"></div>
+    </div>
+    <button id="restart" aria-label="Reiniciar o jogo">Reiniciar Jogo</button>
+    <div class="music-control" id="musicControl" tabindex="0" role="button" aria-pressed="false" aria-label="Tocar ou pausar música">
+      ▶️ Tocar música alegre
+    </div>
+  </div>
+
+  <audio id="backgroundMusic" loop preload="auto" src="https://cdn.pixabay.com/download/audio/2021/11/21/audio_aaaa252da7.mp3?filename=happy-angel-123321.mp3"></audio>
+
+  <script>
+    (function(){
+      const modeSelect = document.getElementById('modeSelect');
+      const status = document.getElementById('status');
+      const board = document.querySelector('.board');
+      const cells = Array.from(document.querySelectorAll('.cell'));
+      const restartBtn = document.getElementById('restart');
+      const musicControl = document.getElementById('musicControl');
+      const backgroundMusic = document.getElementById('backgroundMusic');
+
+      let boardState;
+      let currentPlayer;
+      let gameActive;
+      let mode; // 1 = contra robo, 2 = dois jogadores
+      let isPlayerTurn; // usado no modo robô para controlar se é humano ou IA na vez
+      let robotPlaysFirst = false;
+      let musicPlaying = false;
+
+      const winConditions = [
+        [0,1,2],
+        [3,4,5],
+        [6,7,8],
+        [0,3,6],
+        [1,4,7],
+        [2,5,8],
+        [0,4,8],
+        [2,4,6],
+      ];
+
+      function initGame() {
+        boardState = ["","","","","","","","",""];
+        currentPlayer = "X";
+        gameActive = true;
+        isPlayerTurn = true;
+        cells.forEach(cell => {
+          cell.textContent = '';
+          cell.classList.remove('disabled', 'o');
+          cell.setAttribute('aria-label', 'Vazio');
+          cell.setAttribute('tabindex','0');
+        });
+        if (mode === 1) {
+          if (robotPlaysFirst) {
+            currentPlayer = 'O';
+            isPlayerTurn = false;
+            status.textContent = `Robô começa jogando...`;
+            setTimeout(() => {
+              computerPlay();
+              if (checkWin()) {
+                status.textContent = 'Robô venceu! 😞';
+                gameActive = false;
+                disableAllCells();
+                return;
+              }
+              if (checkDraw()) {
+                status.textContent = 'Empate! Ninguém venceu.';
+                gameActive = false;
+                return;
+              }
+              isPlayerTurn = true;
+              currentPlayer = 'X';
+              status.textContent = `Sua vez!`;
+            }, 600);
+          } else {
+            currentPlayer = 'X';
+            isPlayerTurn = true;
+            status.textContent = `Você é X. Sua vez!`;
+          }
+        } else if (mode === 2) {
+          currentPlayer = "X";
+          status.textContent = `Jogador ${currentPlayer}, é a sua vez`;
+        } else {
+          status.textContent = 'Selecione o modo para começar';
+        }
+      }
+
+      function handleCellClick(e) {
+        if (!gameActive) return;
+        if (mode === 1 && !isPlayerTurn) return;
+        const clickedCell = e.target;
+        const index = Number(clickedCell.getAttribute('data-index'));
+        if (boardState[index] !== '') return;
+
+        playMove(index, currentPlayer);
+
+        if (checkWin()) {
+          status.textContent = (mode ===1 && currentPlayer === 'O') ? 'Robô venceu! 😞' : `Jogador ${currentPlayer} venceu! 🎉`;
+          gameActive = false;
+          disableAllCells();
+          return;
+        }
+
+        if (checkDraw()) {
+          status.textContent = 'Empate! Ninguém venceu.';
+          gameActive = false;
+          return;
+        }
+
+        if (mode === 1) {
+          isPlayerTurn = !isPlayerTurn;
+          if (!isPlayerTurn) {
+            status.textContent = 'Vez do robô...';
+            currentPlayer = 'O';
+            setTimeout(() => {
+              computerPlay();
+              if (checkWin()) {
+                status.textContent = 'Robô venceu! 😞';
+                gameActive = false;
+                disableAllCells();
+                return;
+              }
+              if (checkDraw()) {
+                status.textContent = 'Empate! Ninguém venceu.';
+                gameActive = false;
+                return;
+              }
+              isPlayerTurn = true;
+              currentPlayer = 'X';
+              status.textContent = 'Sua vez!';
+            }, 600);
+          }
+        } else {
+          currentPlayer = currentPlayer === "X" ? "O" : "X";
+          status.textContent = `Jogador ${currentPlayer}, é a sua vez`;
+        }
+      }
+
+      function playMove(index, player) {
+        boardState[index] = player;
+        const cell = cells[index];
+        if (player === 'O') {
+          cell.textContent = '';
+          cell.classList.add('o');
+        } else {
+          cell.textContent = 'X';
+          cell.classList.remove('o');
+        }
+        cell.classList.add('disabled');
+        cell.setAttribute('aria-label', `Marcado com ${player}`);
+        cell.setAttribute('tabindex','-1');
+      }
+
+      function computerPlay() {
+        for (let i = 0; i < boardState.length; i++) {
+          if (boardState[i] === '') {
+            boardState[i] = 'O';
+            if (checkWin()) {
+              playMove(i, 'O');
+              return;
+            }
+            boardState[i] = '';
+          }
+        }
+        for (let i = 0; i < boardState.length; i++) {
+          if (boardState[i] === '') {
+            boardState[i] = 'X';
+            if (checkWin()) {
+              boardState[i] = 'O';
+              playMove(i, 'O');
+              return;
+            }
+            boardState[i] = '';
+          }
+        }
+        const emptyIndices = boardState.reduce((acc, val, idx) => val === '' ? acc.concat(idx) : acc, []);
+        if (emptyIndices.length === 0) return;
+        const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+        playMove(randomIndex, 'O');
+      }
+
+      function checkWin() {
+        return winConditions.some(condition => {
+          const [a,b,c] = condition;
+          return boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c];
+        });
+      }
+
+      function checkDraw() {
+        return boardState.every(cell => cell !== '');
+      }
+
+      function disableAllCells() {
+        cells.forEach(cell => {
+          cell.classList.add('disabled');
+          cell.setAttribute('tabindex','-1');
+        });
+      }
+
+      modeSelect.addEventListener('change', e => {
+        mode = Number(e.target.value);
+        if (mode === 1) {
+          robotPlaysFirst = Math.random() < 0.5;
+        } else {
+          robotPlaysFirst = false;
+        }
+        initGame();
+      });
+
+      restartBtn.addEventListener('click', () => {
+        if (!mode) {
+          status.textContent = 'Selecione o modo para começar';
+          return;
+        }
+        initGame();
+      });
+
+      cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+      cells.forEach(cell => cell.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          this.click();
+        }
+      }));
+
+      musicControl.addEventListener('click', () => {
+        if (!musicPlaying) {
+          backgroundMusic.play();
+          musicPlaying = true;
+          musicControl.textContent = '⏸️ Pausar música';
+          musicControl.setAttribute('aria-pressed', 'true');
+        } else {
+          backgroundMusic.pause();
+          musicPlaying = false;
+          musicControl.textContent = '▶️ Tocar música alegre';
+          musicControl.setAttribute('aria-pressed', 'false');
+        }
+      });
+      musicControl.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          musicControl.click();
+        }
+      });
+
+      mode = Number(modeSelect.value);
+      robotPlaysFirst = Math.random() < 0.5 && mode === 1;
+      initGame();
+    })();
+  </script>
+</body>
+</html>
